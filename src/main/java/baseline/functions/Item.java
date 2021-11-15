@@ -32,8 +32,9 @@ public class Item {
         return price;
     }
 
-    public void setPrice(double worth) {
-        this.price = worth;
+    public void setPrice(String worth) {
+        double actualPrice = Double.parseDouble(worth);
+        this.price = actualPrice;
     }
 
     //double check all strings to make sure they're in proper format
