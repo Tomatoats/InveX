@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class ManagerController extends InventoryManagementApplication implements Initializable {
@@ -93,6 +94,9 @@ public class ManagerController extends InventoryManagementApplication implements
     @FXML
     private TableView listTable;
 
+    @FXML
+    private Button searchClear;
+
 
 
     @FXML
@@ -103,27 +107,27 @@ public class ManagerController extends InventoryManagementApplication implements
 
     public void addItem() {
         int i = 0;
-        if (item.nameRegex(nameText.getText()) == false) {
+        if (!item.nameRegex(nameText.getText())) {
             nameErrorLabel.setText("Name must be within 2-256 characters");
             i++;
         }
         else {
             nameErrorLabel.setText("");
         }
-        if (item.serialRegex(serialText.getText()) == false || uniqueSerial(nameText.getText()) == false){
-            serialErrorLabel.setText("Serial must be unique and in proper format A-XXX-XXX-XXX");
-            i++;
-        }
-        else {
+        if ( uniqueSerial(nameText.getText()) && item.serialRegex(serialText.getText())){
             serialErrorLabel.setText("");
         }
-        if (item.priceRegex(priceText.getText()) == false){
+        else {
+            i++;
+            serialErrorLabel.setText("Serial must be unique and in proper format A-XXX-XXX-XXX");
+        }
+        if (!item.priceRegex(priceText.getText())){
             priceErrorLabel.setText("Price must be greater than 0 and only up to two decimals.");
             i++;
         }
         else {
             priceErrorLabel.setText("");
-            System.out.println("aaaa");
+
         }
         if (i == 0){
             BigDecimal number = BigDecimal.valueOf(0);
@@ -151,6 +155,7 @@ public class ManagerController extends InventoryManagementApplication implements
         removeItem();
     }
     public void removeItem() {
+        listTable.getItems().removeAll(listTable.getSelectionModel().getSelectedItem());
     }
     @FXML
     void aboutPressed(ActionEvent event) {
@@ -167,7 +172,7 @@ public class ManagerController extends InventoryManagementApplication implements
         clearAllItems();
     }
     public void clearAllItems(){
-
+        list.remove(0,list.size());
     }
 
     @FXML
@@ -222,6 +227,16 @@ public class ManagerController extends InventoryManagementApplication implements
         loadAsTSV();
     }
 
+    @FXML
+    void searchClearPressed(ActionEvent event) {
+        //load in original list and clear the text fields
+        clearSearchBars();
+    }
+    public void clearSearchBars(){
+        sortNameText.clear();
+        sortSerialText.clear();
+        listTable.setItems(list);
+    }
 
     @FXML
     void sortNameTyped(ActionEvent event) {
@@ -229,7 +244,16 @@ public class ManagerController extends InventoryManagementApplication implements
         sortNames(sortNameText.getText());
     }
     public void sortNames(String text){
-        //Compare the list to the text given, if any names contain that string, show up
+        ObservableList<Item> names = FXCollections.observableArrayList();
+        String lowertext = text.toLowerCase(Locale.ROOT);
+
+        for (Item item : list) {
+            String lowername = item.getName().toLowerCase(Locale.ROOT);
+            if (lowername.contains(lowertext)) {
+                names.add(item);
+            }
+        }
+        listTable.setItems(names);
     }
     @FXML
     void sortSerialTyped(ActionEvent event) {
@@ -238,6 +262,16 @@ public class ManagerController extends InventoryManagementApplication implements
     }
     public void sortSerial(String text){
         //compare the list to the text given, if any Serials contain that string, show up
+        ObservableList<Item> serial = FXCollections.observableArrayList();
+        String lowertext = text.toLowerCase(Locale.ROOT);
+
+        for (Item item : list) {
+            String lowerserial = item.getSerial().toLowerCase(Locale.ROOT);
+            if (lowerserial.contains(lowertext)) {
+                serial.add(item);
+            }
+        }
+        listTable.setItems(serial);
     }
 
     @Override
@@ -267,7 +301,7 @@ public class ManagerController extends InventoryManagementApplication implements
         colSerial.setCellValueFactory(new PropertyValueFactory<>("serial"));
         colSerial.setCellFactory(TextFieldTableCell.forTableColumn());
         colSerial.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) event -> {
-                    if (Boolean.FALSE.equals(item.serialRegex(String.valueOf(event.getNewValue())))) {
+                    if (Boolean.FALSE.equals(item.serialRegex(String.valueOf(event.getNewValue())))|| !uniqueSerial(String.valueOf(event.getNewValue()))) {
                         serialErrorLabel.setText("Serial must in the format A-XXX-XXX-XXX where X is either letter or number");
                         listTable.refresh();
                     } else {
@@ -325,8 +359,8 @@ public class ManagerController extends InventoryManagementApplication implements
 
     }
     public boolean uniqueSerial(String serial){
-        for (int i = 0; i < list.size(); i++){
-            if (serial.equals(list.get(i).getSerial())){
+        for (Item item : list) {
+            if (item.getSerial().equals(serial)){
                 return false;
             }
         }
