@@ -1,14 +1,15 @@
 package baseline.functions;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Item {
     //set up  what each item has
     String name;
     String serial;
-    double price;
+    String  price;
     //create a new item
-    public Item(String product, String sNumber, double worth){
+    public Item(String product, String sNumber, String worth){
         this.name = product;
         this.serial = sNumber;
         this.price = worth;
@@ -30,20 +31,22 @@ public class Item {
         this.serial = serial;
     }
 
-    public double getPrice() {
+    public String getPrice() {
         return price;
     }
 
     public void setPrice(String worth) {
-        double number = Double.parseDouble(worth);
-        this.price = number;
+        BigDecimal number = new BigDecimal(worth);
+        number.setScale(2, RoundingMode.HALF_UP);
+        String priceActual = number.toString();
+        this.price = priceActual;
     }
 
     //double check all strings to make sure they're in proper format
 
     public boolean nameRegex(String product){
         // if name is  within 2 and 256 characters, set this to true and setname to this
-        if (product.length() > 2 && product.length() < 257){
+        if (product.length() > 1 && product.length() < 257){
             return true;
         }
         //else, send as false
@@ -66,23 +69,30 @@ public class Item {
     }
     public boolean priceRegex(String worth){
         //try parsing it, if it doesn't work return false
-        double tester = 1;
         try{
-            double number = Double.parseDouble(worth);
-            System.out.println(number);
-            if (number %tester == 0){
-                System.out.println(number);
+            BigDecimal tester = new BigDecimal(0);
+            BigDecimal number = new BigDecimal(worth);
+            number.setScale(2,RoundingMode.HALF_UP);
+            String priceActual = number.toString();
+            if (number.compareTo(tester) > 0) {
+                if (priceActual.contains(".")){
+                    String[] splitted = priceActual.split("[.]",2);
+                    System.out.println(splitted[0]);
+                    System.out.println(splitted[1]);
+                    if (splitted[1].length() > 2) {
+                        return false;
+                    }
+                }
                 return true;
             }
             else
             {
-                return  false;
-            }
+                return false;
+                }
         }
         catch (NumberFormatException numberFormatException){
             //otherwise, set to false
             return false;
         }
-
     }
 }

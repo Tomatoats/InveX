@@ -13,17 +13,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.StringConverter;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class ManagerController extends InventoryManagementApplication implements Initializable {
     FileChooser fileChooser = new FileChooser();
     public ObservableList<Item> list = FXCollections.observableArrayList();
-    Item item = new Item("","",0);
+    Item item = new Item("","","");
 
     @FXML
     private MenuItem aboutButton;
@@ -83,7 +85,7 @@ public class ManagerController extends InventoryManagementApplication implements
     private TableColumn<Item, String> colName;
 
     @FXML
-    private TableColumn<Item, Double> colPrice;
+    private TableColumn<Item, String> colPrice;
 
     @FXML
     private TableColumn<Item, String> colSerial;
@@ -124,7 +126,8 @@ public class ManagerController extends InventoryManagementApplication implements
             System.out.println("aaaa");
         }
         if (i == 0){
-            Item newItem = new Item("","",1);
+            BigDecimal number = BigDecimal.valueOf(0);
+            Item newItem = new Item("","","");
             newItem.setName(nameText.getText());
             newItem.setSerial(serialText.getText());
             newItem.setPrice(priceText.getText());
@@ -250,35 +253,41 @@ public class ManagerController extends InventoryManagementApplication implements
         listTable.setEditable(true);
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colName.setCellFactory(TextFieldTableCell.forTableColumn());
-        /*colName.setOnEditCommit((EventHandler<TableColumn.CellEditEvent>) event -> {
+        colName.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) event -> {
                     if (item.nameRegex(String.valueOf(event.getNewValue())) == true) {
+                        ((Item) event.getTableView().getItems().get(event.getTablePosition().getRow())).setName(String.valueOf((event.getNewValue())));
                         nameErrorLabel.setText("");
                     } else {
                         nameErrorLabel.setText("Name must be within 2-256 characters");
+                        listTable.refresh();
                     }
                 }
-        );*/
+        );
 
         colSerial.setCellValueFactory(new PropertyValueFactory<>("serial"));
         colSerial.setCellFactory(TextFieldTableCell.forTableColumn());
-        /*colSerial.setOnEditCommit((EventHandler<TableColumn.CellEditEvent>) event -> {
+        colSerial.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item, String>>) event -> {
                     if (Boolean.FALSE.equals(item.serialRegex(String.valueOf(event.getNewValue())))) {
                         serialErrorLabel.setText("Serial must in the format A-XXX-XXX-XXX where X is either letter or number");
+                        listTable.refresh();
                     } else {
+                        ((Item) event.getTableView().getItems().get(event.getTablePosition().getRow())).setSerial(String.valueOf((event.getNewValue())));
                         serialErrorLabel.setText("");
                     }
                 }
-        );*/
+        );
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         colPrice.setCellFactory(TextFieldTableCell.forTableColumn());
-        /*colPrice.setOnEditCommit((EventHandler<TableColumn.CellEditEvent>) event -> {
+        colPrice.setOnEditCommit((EventHandler<TableColumn.CellEditEvent<Item,String>>) event -> {
                     if (Boolean.FALSE.equals(item.priceRegex(String.valueOf(event.getNewValue())))) {
                         priceErrorLabel.setText("Price must be greater than 0 And  numbers only (decimal allowed)");
+                        listTable.refresh();
                     } else {
+                        ((Item) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPrice(String.valueOf((event.getNewValue())));
                         priceErrorLabel.setText("");
                     }
                 }
-        );*/
+        );
 
 
     }
