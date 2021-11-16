@@ -42,9 +42,6 @@ public class InventoryManagementApplication extends  javafx.application.Applicat
         this.sceneMap = addmap;
     }
 
-    public Map<String, Scene> getSceneMap(){
-        return sceneMap;
-    }
 
     // tab is \t
     //html needs header and body
