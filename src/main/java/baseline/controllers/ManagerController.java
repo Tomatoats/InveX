@@ -13,20 +13,24 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javafx.util.StringConverter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
 public class ManagerController extends InventoryManagementApplication implements Initializable {
     FileChooser fileChooser = new FileChooser();
     public ObservableList<Item> list = FXCollections.observableArrayList();
     Item item = new Item("","","");
+
 
     @FXML
     private MenuItem aboutButton;
@@ -178,37 +182,54 @@ public class ManagerController extends InventoryManagementApplication implements
     @FXML
     void htmlPressed(ActionEvent event) {
         //make it save as an HTML
-        saveFile("HTML");
+        saveFile("*.html");
     }
 
     @FXML
     void jsonPressed(ActionEvent event) {
         //Make it save as an JSON
-        saveFile("JSON");
+        saveFile("*.JSON");
     }
 
     @FXML
     void tsvPressed(ActionEvent event) {
         //make it save as a txt
-        saveFile("txt");
+        saveFile("*.txt");
     }
     public void saveFile(String fileType){
         Window stage = nameErrorLabel.getScene().getWindow();
         //open up filechooser and set up for a txt file to be saved
         fileChooser.setTitle("Save Dialog");
         fileChooser.setInitialFileName("Lister");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("text file", "*.txt"));
-        try {
-            File file = fileChooser.showSaveDialog(stage);
-            fileChooser.setInitialDirectory(file.getParentFile());
-            saveAsTSV(file);
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("text file", fileType));
+        if (fileType.equals("*.txt")){
+            try {
+                File file = fileChooser.showSaveDialog(stage);
+                fileChooser.setInitialDirectory(file.getParentFile());
+                saveAsTSV(file);
+            }
+            catch (Exception ignored){}
         }
-        catch (Exception ignored){}
+        else if (fileType.equals("*.JSON")){
+            try {
+                File file = fileChooser.showSaveDialog(stage);
+                fileChooser.setInitialDirectory(file.getParentFile());
+                saveAsJSON(file);
+            }
+            catch (Exception ignored){}
+        }
+        else{
+            try {
+                File file = fileChooser.showSaveDialog(stage);
+                fileChooser.setInitialDirectory(file.getParentFile());
+                saveAsHTML(file);
+            }
+            catch (Exception ignored){}
+        }
+        }
 
         //depending on the what file it is, open up a file to save as
         // and save it in the format that file needs
-    }
-
     @FXML
     void loadHTMLPressed(ActionEvent event) {
         //load the list  as an HTML
@@ -226,6 +247,7 @@ public class ManagerController extends InventoryManagementApplication implements
         //load the list as a TSV
         loadAsTSV();
     }
+
 
     @FXML
     void searchClearPressed(ActionEvent event) {
@@ -343,16 +365,92 @@ public class ManagerController extends InventoryManagementApplication implements
             ex.printStackTrace();
         }
     }
-    public void saveAsHTML(){
+    public void saveAsHTML(File file){
+        try {
+            //write down the entire list into a file
+            FileWriter fileWriter = null;
+
+            fileWriter = new FileWriter(file);
+            fileWriter.write("<html>\n\t<head>\n\t\t<title>Invex system</title>\n\t</head>\n\t<body>\n\t\t<table>\n\t\t");
+            fileWriter.write("<thread>\n\t\t<tr>\n\t\t");
+            fileWriter.write("<td>Name</td>\n\t\t");
+            fileWriter.write("<td>Serial Number</td>\n\t\t");
+            fileWriter.write("<td>Price (in $)</td>\n\t\t</tr>\n\t\t</thread>\n\t\t<tbody>\n\t\t");
+            for (int i = 0; i < list.size();i++) {
+                fileWriter.write("<tr>\n\t\t");
+                fileWriter.write("<td>"+list.get(i).getName()+"</td>\n\t\t");
+                fileWriter.write("<td>"+list.get(i).getSerial()+"</td>\n\t\t");
+                fileWriter.write("<td>"+list.get(i).getPrice()+"</td>\n\t\t");
+                fileWriter.write("</tr>\n\t\t");
+            }
+            fileWriter.write("</tbody>\n\t\t</table>\n\t");
+            fileWriter.write("</body>\n</html>");
+            fileWriter.close();
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
 
     }
-    public void saveAsJSON(){
+    public void saveAsJSON(File file){
 
     }
     public void loadAsTSV(){
+        Window stage = nameErrorLabel.getScene().getWindow();
+        // load up the filechooser and look for only text files
+        fileChooser.setTitle("Load Dialog");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a text file (TSV), html, or JSON", "*.txt","*.html","*.JSON"));
+        File file = fileChooser.showOpenDialog(stage);
+        fileChooser.setInitialDirectory(file.getParentFile());
+        try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("\n"))
+        {
+            clearAllItems();
+            //make sure the list is empty then scan in all the strings, parsing them correctly
+            //also use a while to make sure it continues after the delimiter
+            while (input.hasNext()) {
+                Item items = new Item("", "","");
+                String str = input.next();
+                String[] ArrayofString = str.split("\t", 3);
+                items.setName(ArrayofString[0]);
+                items.setSerial(ArrayofString[1]);
+                items.setPrice(ArrayofString[2]);
+                list.add(items);
+            }
+            nameErrorLabel.setText("");
+        }
+        catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
+            nameErrorLabel.setText("Either the file was corrupted or not in inveX format.");
+        }
+
 
     }
     public void loadAsHTML(){
+        Window stage = nameErrorLabel.getScene().getWindow();
+        // load up the filechooser and look for only text files
+        fileChooser.setTitle("Load Dialog");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a text file (TSV), html, or JSON", "*.txt","*.html","*.JSON"));
+        File file = fileChooser.showOpenDialog(stage);
+        fileChooser.setInitialDirectory(file.getParentFile());
+        try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("</html>"))
+        {
+            clearAllItems();
+            //make sure the list is empty then scan in all the strings, parsing them correctly
+            //also use a while to make sure it continues after the delimiter
+            while (input.hasNext()) {
+                Item items = new Item("", "","");
+                String str = input.next();
+                String[] ArrayofString = str.split("\t", 3);
+                items.setName(ArrayofString[0]);
+                items.setSerial(ArrayofString[1]);
+                items.setPrice(ArrayofString[2]);
+                list.add(items);
+            }
+            nameErrorLabel.setText("");
+        }
+        catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
+            nameErrorLabel.setText("Either the file was corrupted or not in inveX format.");
+        }
+
 
     }
     public void loadAsJSON(){
