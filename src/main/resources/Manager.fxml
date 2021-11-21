@@ -33,11 +33,6 @@
               <MenuItem fx:id="deleteAllButton" mnemonicParsing="false" onAction="#clearPressed" text="Delete All Items" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem fx:id="aboutButton" mnemonicParsing="false" onAction="#aboutPressed" text="About" />
-            </items>
-          </Menu>
         </menus>
       </MenuBar>
    </top>

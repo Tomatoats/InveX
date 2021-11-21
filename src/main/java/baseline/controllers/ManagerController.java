@@ -39,14 +39,11 @@ public class ManagerController extends InventoryManagementApplication implements
 
 
 
-    @FXML
-    private MenuItem aboutButton;
+
+
 
     @FXML
-    private Button addButton;
-
-    @FXML
-    private MenuItem deleteAllButton;
+    private MenuItem loadTSVButton;
 
     @FXML
     private MenuItem loadHTMLButton;
@@ -54,23 +51,10 @@ public class ManagerController extends InventoryManagementApplication implements
     @FXML
     private MenuItem loadJSONButton;
 
-    @FXML
-    private MenuItem loadTSVButton;
+
 
     @FXML
-    private Label nameErrorLabel;
-
-    @FXML
-    private TextField nameText;
-
-    @FXML
-    private Label priceErrorLabel;
-
-    @FXML
-    private TextField priceText;
-
-    @FXML
-    private Button removeItemButton;
+    private MenuItem saveTSV;
 
     @FXML
     private MenuItem saveHTML;
@@ -79,19 +63,39 @@ public class ManagerController extends InventoryManagementApplication implements
     private MenuItem saveJSON;
 
     @FXML
-    private MenuItem saveTSV;
+    private MenuItem deleteAllButton;
+
+    @FXML
+    private Label nameErrorLabel;
+
+    @FXML
+    public TextField nameText;
+
+    @FXML
+    public TextField serialText;
 
     @FXML
     private Label serialErrorLabel;
 
     @FXML
-    private TextField serialText;
+    private Label priceErrorLabel;
+
+    @FXML
+    public TextField priceText;
+
+
 
     @FXML
     private TextField sortNameText;
 
     @FXML
     private TextField sortSerialText;
+
+    @FXML
+    private Button searchClear;
+
+    @FXML
+    private TableView listTable;
 
     @FXML
     private TableColumn<Item, String> colName;
@@ -102,13 +106,12 @@ public class ManagerController extends InventoryManagementApplication implements
     @FXML
     private TableColumn<Item, String> colSerial;
 
-    @FXML
-    private TableView listTable;
 
     @FXML
-    private Button searchClear;
+    private Button removeItemButton;
 
-
+    @FXML
+    private Button addButton;
 
     @FXML
     void addPressed(ActionEvent event) {
@@ -125,12 +128,15 @@ public class ManagerController extends InventoryManagementApplication implements
         else {
             nameErrorLabel.setText("");
         }
-        if ( uniqueSerial(nameText.getText()) && item.serialRegex(serialText.getText())){
-            serialErrorLabel.setText("");
+        if (!uniqueSerial(serialText.getText())){
+            serialErrorLabel.setText("Serial must be unique.");
+            i++;
+        }
+        if (item.serialRegex(serialText.getText())){
         }
         else {
             i++;
-            serialErrorLabel.setText("Serial must be unique and in proper format A-XXX-XXX-XXX");
+            serialErrorLabel.setText("Serial must be in format A-XXX-XXX-XXX");
         }
         if (!item.priceRegex(priceText.getText())){
             priceErrorLabel.setText("Price must be greater than 0 and only up to two decimals.");
@@ -168,14 +174,7 @@ public class ManagerController extends InventoryManagementApplication implements
     public void removeItem() {
         listTable.getItems().removeAll(listTable.getSelectionModel().getSelectedItem());
     }
-    @FXML
-    void aboutPressed(ActionEvent event) {
-        //make a function that deals with this
-        openUpAbout();
-    }
-    public void openUpAbout(){
 
-    }
 
     @FXML
     void clearPressed(ActionEvent event) {
@@ -508,8 +507,6 @@ public class ManagerController extends InventoryManagementApplication implements
         File file = fileChooser.showOpenDialog(stage);
         fileChooser.setInitialDirectory(file.getParentFile());
         //try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("]"))
-        //{
-
         try {
         clearAllItems();
         ArrayList<Item> cal = new ArrayList<>();
@@ -540,12 +537,17 @@ public class ManagerController extends InventoryManagementApplication implements
         }*/
     }
     public boolean uniqueSerial(String serial){
+        boolean istrue  = true;
         for (Item item : list) {
+            System.out.println(serial);
+            System.out.println(item.getSerial());
             if (item.getSerial().equals(serial)){
-                return false;
+                //System.out.println("YOOOOOOOOOOO");
+                istrue = false;
+                //return false;
             }
         }
-        return  true;
+        return istrue;
     }
 
 }
