@@ -15,6 +15,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Scanner;
@@ -373,14 +376,14 @@ public class ManagerController extends InventoryManagementApplication implements
             fileWriter = new FileWriter(file);
             fileWriter.write("<html>\n\t<head>\n\t\t<title>Invex system</title>\n\t</head>\n\t<body>\n\t\t<table>\n\t\t");
             fileWriter.write("<thread>\n\t\t<tr>\n\t\t");
-            fileWriter.write("<td>Name</td>\n\t\t");
-            fileWriter.write("<td>Serial Number</td>\n\t\t");
-            fileWriter.write("<td>Price (in $)</td>\n\t\t</tr>\n\t\t</thread>\n\t\t<tbody>\n\t\t");
+            fileWriter.write("<td> <i> Name </i> </td>\n\t\t");
+            fileWriter.write("<td> <i> Serial Number </i> </td>\n\t\t");
+            fileWriter.write("<td> <i> Price (in $ )</i> </td>\n\t\t</tr>\n\t\t</thread>\n\t\t<tbody>\n\t\t");
             for (int i = 0; i < list.size();i++) {
-                fileWriter.write("<tr>\n\t\t");
-                fileWriter.write("<td>"+list.get(i).getName()+"</td>\n\t\t");
-                fileWriter.write("<td>"+list.get(i).getSerial()+"</td>\n\t\t");
-                fileWriter.write("<td>"+list.get(i).getPrice()+"</td>\n\t\t");
+                fileWriter.write("<tr>\n");
+                fileWriter.write("\t\t<td> "+list.get(i).getName()+" </td>\n");
+                fileWriter.write("\t\t<td> "+list.get(i).getSerial()+" </td>\n");
+                fileWriter.write("\t\t<td> "+list.get(i).getPrice()+" </td>\n");
                 fileWriter.write("</tr>\n\t\t");
             }
             fileWriter.write("</tbody>\n\t\t</table>\n\t");
@@ -431,20 +434,34 @@ public class ManagerController extends InventoryManagementApplication implements
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a text file (TSV), html, or JSON", "*.txt","*.html","*.JSON"));
         File file = fileChooser.showOpenDialog(stage);
         fileChooser.setInitialDirectory(file.getParentFile());
-        try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("</html>"))
-        {
+        try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("</html>")) {
             clearAllItems();
             //make sure the list is empty then scan in all the strings, parsing them correctly
             //also use a while to make sure it continues after the delimiter
-            while (input.hasNext()) {
-                Item items = new Item("", "","");
-                String str = input.next();
-                String[] ArrayofString = str.split("\t", 3);
-                items.setName(ArrayofString[0]);
-                items.setSerial(ArrayofString[1]);
-                items.setPrice(ArrayofString[2]);
-                list.add(items);
+            ArrayList<String> arrayOfString = new ArrayList<>();
+            String unparsed = input.next();
+            Document doc = Jsoup.parse(unparsed);
+            Element table = doc.select("table").get(0);
+            Elements rows = doc.select("tr");
+            for (int i = 1; i < rows.size(); i++){
+                Element row = rows.get(i);
+                Elements cols = row.select("td");
+                arrayOfString.add(String.valueOf(cols.get(0).text()));
+                arrayOfString.add(String.valueOf(cols.get(1).text()));
+                arrayOfString.add(String.valueOf(cols.get(2).text()));
             }
+            for (int i = 0; i < arrayOfString.size(); i++) {
+                Item items = new Item("", "", "");
+                items.setName(arrayOfString.get(i));
+                items.setSerial(arrayOfString.get(i + 1));
+                items.setPrice(arrayOfString.get(i + 2));
+                System.out.println(arrayOfString.get(i));
+                System.out.println(arrayOfString.get(i+1));
+                System.out.println(arrayOfString.get(i+2));
+                list.add(items);
+                i = i+2;
+            }
+
             nameErrorLabel.setText("");
         }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
