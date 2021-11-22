@@ -57,6 +57,7 @@ __
 -void loadHtmlPressed(ActionEvent event);
 -void loadJsonPressed(ActionEvent event);
 -void loadTsvPressed(ActionEvent event);
++loadFile(String);
 +loadAsTSV(file);
 +loadAsHTML(file);
 +loadAsJSON(file);

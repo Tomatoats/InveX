@@ -81,8 +81,6 @@ public class Item {
             if (number.compareTo(tester) > 0) {
                 if (priceActual.contains(".")){
                     String[] splitted = priceActual.split("[.]",2);
-                    System.out.println(splitted[0]);
-                    System.out.println(splitted[1]);
                     if (splitted[1].length() > 2) {
                         return false;
                     }

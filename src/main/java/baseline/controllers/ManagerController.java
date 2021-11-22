@@ -2,8 +2,7 @@ package baseline.controllers;
 
 import baseline.InventoryManagementApplication;
 import baseline.functions.Item;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -21,7 +20,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -135,12 +133,11 @@ public class ManagerController extends InventoryManagementApplication implements
             serialErrorLabel.setText("Serial must be unique.");
             i++;
         }
-        if (item.serialRegex(serialText.getText())){
-        }
-        else {
+        if (!item.serialRegex(serialText.getText())){
             i++;
             serialErrorLabel.setText("Serial must be in format A-XXX-XXX-XXX");
         }
+
         if (!item.priceRegex(priceText.getText())){
             priceErrorLabel.setText("Price must be greater than 0 and only up to two decimals.");
             i++;
@@ -150,7 +147,6 @@ public class ManagerController extends InventoryManagementApplication implements
 
         }
         if (i == 0){
-            BigDecimal number = BigDecimal.valueOf(0);
             Item newItem = new Item("","","");
             newItem.setName(nameText.getText());
             newItem.setSerial(serialText.getText());
@@ -205,67 +201,70 @@ public class ManagerController extends InventoryManagementApplication implements
         //make it save as a txt
         saveFile("*.txt");
     }
+
     public void saveFile(String fileType){
         Window stage = nameErrorLabel.getScene().getWindow();
         //open up filechooser and set up for a txt file to be saved
         fileChooser.setTitle("Save Dialog");
         fileChooser.setInitialFileName("InveX");
+        // and save it in the format that file needs
+        //depending on the what file it is, open up a file to save as
         if (fileType.equals("*.txt")){
             try {
                 FileChooser.ExtensionFilter tsv = new FileChooser.ExtensionFilter("Save as a TSV text file (.txt)", "*.txt");
                 fileChooser.getExtensionFilters().add(tsv);
                 fileChooser.setSelectedExtensionFilter(tsv);
-                //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save / load a txt", "*.txt"));
                 File file = fileChooser.showSaveDialog(stage);
                 fileChooser.setInitialDirectory(file.getParentFile());
                 saveAsTSV(file);
             }
-            catch (Exception ignored){}
+            catch (Exception ignored){
+                ignored.printStackTrace();
+            }
         }
         else if (fileType.equals("*.JSON")){
             try {
                 FileChooser.ExtensionFilter json = new FileChooser.ExtensionFilter("Save as a .JSON file", "*.JSON");
                 fileChooser.getExtensionFilters().add(json);
                 fileChooser.setSelectedExtensionFilter(json);
-                //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(" Save / load a json file", "*.JSON"));
                 File file = fileChooser.showSaveDialog(stage);
                 fileChooser.setInitialDirectory(file.getParentFile());
                 saveAsJSON(file);
             }
-            catch (Exception ignored){}
+            catch (Exception ignored){
+                ignored.printStackTrace();
+            }
         }
         else{
             try {
                 FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("Save as a html file", "*.html");
                 fileChooser.getExtensionFilters().add(html);
                 fileChooser.setSelectedExtensionFilter(html);
-                //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save as a html file", "*.html"));
                 File file = fileChooser.showSaveDialog(stage);
                 fileChooser.setInitialDirectory(file.getParentFile());
                 saveAsHTML(file);
             }
-            catch (Exception ignored){}
+            catch (Exception ignored){
+                ignored.printStackTrace();
+            }
         }
-        }
-
-        //depending on the what file it is, open up a file to save as
-        // and save it in the format that file needs
+    }
     @FXML
     void loadHTMLPressed(ActionEvent event) {
         //load the list  as an HTML
-        loadAsHTML();
+        loadFile("*.html");
     }
 
     @FXML
     void loadJSONPressed(ActionEvent event) {
         //load the list as a JSON
-        loadAsJSON();
+        loadFile("*.JSON");
     }
 
     @FXML
     void loadTSVPressed(ActionEvent event) {
         //load the list as a TSV
-        loadAsTSV();
+        loadFile("*.txt");
     }
 
 
@@ -289,10 +288,10 @@ public class ManagerController extends InventoryManagementApplication implements
         ObservableList<Item> names = FXCollections.observableArrayList();
         String lowertext = text.toLowerCase(Locale.ROOT);
 
-        for (Item item : list) {
-            String lowername = item.getName().toLowerCase(Locale.ROOT);
+        for (Item items : list) {
+            String lowername = items.getName().toLowerCase(Locale.ROOT);
             if (lowername.contains(lowertext)) {
-                names.add(item);
+                names.add(items);
             }
         }
         listTable.setItems(names);
@@ -307,10 +306,10 @@ public class ManagerController extends InventoryManagementApplication implements
         ObservableList<Item> serial = FXCollections.observableArrayList();
         String lowertext = text.toLowerCase(Locale.ROOT);
 
-        for (Item item : list) {
-            String lowerserial = item.getSerial().toLowerCase(Locale.ROOT);
+        for (Item items : list) {
+            String lowerserial = items.getSerial().toLowerCase(Locale.ROOT);
             if (lowerserial.contains(lowertext)) {
-                serial.add(item);
+                serial.add(items);
             }
         }
         listTable.setItems(serial);
@@ -370,8 +369,8 @@ public class ManagerController extends InventoryManagementApplication implements
         try {
             //write down the entire list into a file
             FileWriter fileWriter = null;
-
             fileWriter = new FileWriter(file);
+            fileWriter.write("Name\tSerial Number\tPrice($)\n");
             for (int i = 0; i < list.size();i++) {
                 fileWriter.write(list.get(i).getName() + "\t");
                 fileWriter.write( list.get(i).getSerial() + "\t");
@@ -420,9 +419,9 @@ public class ManagerController extends InventoryManagementApplication implements
             String shutUpSonarLint = "\",\n";
 
             for (int i = 0; i < list.size();i++) {
-                fileWriter.write("\"Name\":\" " + list.get(i).getName() +"\",\n");
-                fileWriter.write("\"serial\":\" " + list.get(i).getSerial() +"\",\n");
-                fileWriter.write("\"price\":\" " + list.get(i).getPrice() + "\"\n");
+                fileWriter.write("\"Name\":\"" + list.get(i).getName() +"\",\n");
+                fileWriter.write("\"serial\":\"" + list.get(i).getSerial() +"\",\n");
+                fileWriter.write("\"price\":\"" + list.get(i).getPrice() + "\"\n");
                 if (i+1 < list.size()) {
                     fileWriter.write("},\n{\n");
                 }
@@ -440,15 +439,12 @@ public class ManagerController extends InventoryManagementApplication implements
 
 
     }
-    public void loadAsTSV(){
-        Window stage = nameErrorLabel.getScene().getWindow();
+    public boolean loadAsTSV(File file){
         // load up the filechooser and look for only text files
         fileChooser.setTitle("Load Dialog");
         FileChooser.ExtensionFilter tsv = new FileChooser.ExtensionFilter("choose a text file (TSV)", "*.txt");
         fileChooser.getExtensionFilters().add(tsv);
         fileChooser.setSelectedExtensionFilter(tsv);
-        //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a text file (TSV)", "*.txt"));
-        File file = fileChooser.showOpenDialog(stage);
         try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("\n"))
         {
             fileChooser.setInitialDirectory(file.getParentFile());
@@ -456,30 +452,27 @@ public class ManagerController extends InventoryManagementApplication implements
             //make sure the list is empty then scan in all the strings, parsing them correctly
             //also use a while to make sure it continues after the delimiter
             while (input.hasNext()) {
-                Item items = new Item("", "","");
+                Item items = new Item("", "", "");
                 String str = input.next();
                 String[] ArrayofString = str.split("\t", 3);
-                items.setName(ArrayofString[0]);
-                items.setSerial(ArrayofString[1]);
-                items.setPrice(ArrayofString[2]);
-                list.add(items);
+                if (!ArrayofString[2].contains("$")) {
+                    items.setName(ArrayofString[0]);
+                    items.setSerial(ArrayofString[1]);
+                    items.setPrice(ArrayofString[2]);
+                    list.add(items);
+                }
             }
-            nameErrorLabel.setText("");
+            return true;
         }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
-            nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+            return false;
         }
 
     }
-    public void loadAsHTML(){
-        Window stage = nameErrorLabel.getScene().getWindow();
+    public boolean loadAsHTML(File file){
         // load up the filechooser and look for only text files
         fileChooser.setTitle("Load Dialog");
-        FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("choose a html file", "*.html");
-        fileChooser.getExtensionFilters().add(html);
-        fileChooser.setSelectedExtensionFilter(html);
-        //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a  html", "*.html"));
-        File file = fileChooser.showOpenDialog(stage);
+
         try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("</html>")) {
             fileChooser.setInitialDirectory(file.getParentFile());
             clearAllItems();
@@ -505,24 +498,18 @@ public class ManagerController extends InventoryManagementApplication implements
                 list.add(items);
                 i = i+2;
             }
-
-            nameErrorLabel.setText("");
+            return true;
         }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
-            nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+            return false;
         }
 
 
     }
-    public void loadAsJSON() {
+    public boolean loadAsJSON(File file) {
         ArrayList<String> listOfString = new ArrayList<>();
-        Window stage = nameErrorLabel.getScene().getWindow();
         // load up the filechooser and look for only text files
-        fileChooser.setTitle("Load Dialog");
-        FileChooser.ExtensionFilter json = new FileChooser.ExtensionFilter("choose a JSON file", "*.JSON");
-        fileChooser.getExtensionFilters().add(json);
-        fileChooser.setSelectedExtensionFilter(json);
-        File file = fileChooser.showOpenDialog(stage);
+
         try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("\n")) {
             fileChooser.setInitialDirectory(file.getParentFile());
             clearAllItems();
@@ -537,17 +524,9 @@ public class ManagerController extends InventoryManagementApplication implements
                     String whatWeWant = ArrayofString[1];
                     String[] removeQuotes = whatWeWant.split("[\"]",3);
                     String info = removeQuotes[1];
-                    //items.setName(ArrayofString[0]);
-                    //items.setSerial(ArrayofString[1]);
-                    //items.setPrice(ArrayofString[2]);
-                    //list.add(items);
-                   // System.out.println(ArrayofString[0]);
-                    System.out.println(ArrayofString[1]);
-                    System.out.println(info);
                     listOfString.add(info);
                 }
             }
-            nameErrorLabel.setText("");
                 for (int i = 0; i < listOfString.size(); i++){
                     String name = listOfString.get(i);
                     String serial = listOfString.get(i+1);
@@ -556,14 +535,10 @@ public class ManagerController extends InventoryManagementApplication implements
                     list.add(items);
                     i = i+2;
                 }
-                //System.out.println(list.get(i).getName());
-                //System.out.println(list.get(i).getSerial());
-                //System.out.println(list.get(i).getPrice());
-
-            //}
+            return true;
     }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
-            nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+            return false;
         }
     }
     public boolean uniqueSerial(String serial){
@@ -577,5 +552,63 @@ public class ManagerController extends InventoryManagementApplication implements
         }
         return istrue;
     }
+    public void loadFile(String fileType){
+    Window stage = nameErrorLabel.getScene().getWindow();
+    //open up filechooser and set up for a txt file to be loaded
+        fileChooser.setTitle("Load Dialogue");
+    // and load it in the file format
+        if (fileType.equals("*.txt")){
+        try {
+            FileChooser.ExtensionFilter tsv = new FileChooser.ExtensionFilter("choose a text file (TSV)", "*.txt");
+            fileChooser.getExtensionFilters().add(tsv);
+            fileChooser.setSelectedExtensionFilter(tsv);
+            File file = fileChooser.showOpenDialog(stage);
+            fileChooser.setInitialDirectory(file.getParentFile());
+            if (loadAsTSV(file)){
+                loadAsTSV(file);
+                nameErrorLabel.setText("");
+            }
+            else {
+                nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+            }
+        }
+        catch (Exception ignored){}
+    }
+        else if (fileType.equals("*.JSON")){
+        try {
+            FileChooser.ExtensionFilter json = new FileChooser.ExtensionFilter("choose a JSON file", "*.JSON");
+            fileChooser.getExtensionFilters().add(json);
+            fileChooser.setSelectedExtensionFilter(json);
+            File file = fileChooser.showOpenDialog(stage);
+            fileChooser.setInitialDirectory(file.getParentFile());
+            if (loadAsJSON(file)){
+                loadAsJSON(file);
+                nameErrorLabel.setText("");
+            }
+            else {
+                nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+            }
+        }
+        catch (Exception ignored){}
+    }
+        else{
+        try {
+            FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("choose a html file", "*.html");
+            fileChooser.getExtensionFilters().add(html);
+            fileChooser.setSelectedExtensionFilter(html);
+            File file = fileChooser.showOpenDialog(stage);
+            fileChooser.setInitialDirectory(file.getParentFile());
+            if (loadAsHTML(file)){
+                loadAsHTML(file);
+                nameErrorLabel.setText("");
+            }
+            else {
+                nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+            }
+
+        }
+        catch (Exception ignored){}
+    }
+}
 
 }
