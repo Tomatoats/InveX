@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 2 Solution
+ *  Copyright 2021 Alexys Veloz
+ */
 public class InventoryManagementApplication extends  javafx.application.Application{
     Map<String, Scene> sceneMap = new HashMap<>();
 

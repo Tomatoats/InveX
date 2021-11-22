@@ -2,6 +2,10 @@ package baseline.functions;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 2 Solution
+ *  Copyright 2021 Alexys Veloz
+ */
 
 public class Item {
     //set up  what each item has

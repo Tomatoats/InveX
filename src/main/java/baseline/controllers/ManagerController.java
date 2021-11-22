@@ -3,6 +3,7 @@ package baseline.controllers;
 import baseline.InventoryManagementApplication;
 import baseline.functions.Item;
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,10 +20,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -31,6 +29,11 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 2 Solution
+ *  Copyright 2021 Alexys Veloz
+ */
 
 public class ManagerController extends InventoryManagementApplication implements Initializable {
     FileChooser fileChooser = new FileChooser();
@@ -320,8 +323,7 @@ public class ManagerController extends InventoryManagementApplication implements
     }
     public void initializeTable(){
 
-        //Set up the three columns, letting two of them being editable
-        // and the complete one being kinda
+        //Set up the three columns, all of them being editable
         listTable.setItems(list);
         listTable.setEditable(true);
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -414,13 +416,13 @@ public class ManagerController extends InventoryManagementApplication implements
         try {
             FileWriter fileWriter = null;
             fileWriter = new FileWriter(file);
-            fileWriter.write("[\n{");
+            fileWriter.write("[\n{\n");
             String shutUpSonarLint = "\",\n";
 
             for (int i = 0; i < list.size();i++) {
-                fileWriter.write("\"Name\":\"" + list.get(i).getName() +"\",\n");
-                fileWriter.write("\"serial\":\"" + list.get(i).getSerial() +"\",\n");
-                fileWriter.write("\"price\":\"" + list.get(i).getPrice() + "\"\n");
+                fileWriter.write("\"Name\":\" " + list.get(i).getName() +"\",\n");
+                fileWriter.write("\"serial\":\" " + list.get(i).getSerial() +"\",\n");
+                fileWriter.write("\"price\":\" " + list.get(i).getPrice() + "\"\n");
                 if (i+1 < list.size()) {
                     fileWriter.write("},\n{\n");
                 }
@@ -513,42 +515,56 @@ public class ManagerController extends InventoryManagementApplication implements
 
     }
     public void loadAsJSON() {
-        /*Gson gson = new Gson();
+        ArrayList<String> listOfString = new ArrayList<>();
         Window stage = nameErrorLabel.getScene().getWindow();
         // load up the filechooser and look for only text files
         fileChooser.setTitle("Load Dialog");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save / load a json file ", "*.JSON"));
+        FileChooser.ExtensionFilter json = new FileChooser.ExtensionFilter("choose a JSON file", "*.JSON");
+        fileChooser.getExtensionFilters().add(json);
+        fileChooser.setSelectedExtensionFilter(json);
         File file = fileChooser.showOpenDialog(stage);
-        fileChooser.setInitialDirectory(file.getParentFile());
-        //try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("]"))
-        try {
-        clearAllItems();
-        ArrayList<Item> cal = new ArrayList<>();
-        cal = gson.fromJson(new FileReader(file));
+        try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("\n")) {
+            fileChooser.setInitialDirectory(file.getParentFile());
+            clearAllItems();
 
         //make sure the list is empty then scan in all the strings, parsing them correctly
         //also use a while to make sure it continues after the delimiter
-            /*while (input.hasNext()) {
-                Item items = new Item("", "","");
+            while (input.hasNext()) {
                 String str = input.next();
-                String[] ArrayofString = str.split("\t", 3);
-                items.setName(ArrayofString[0]);
-                items.setSerial(ArrayofString[1]);
-                items.setPrice(ArrayofString[2]);
-                list.add(items);
+
+                if (str.contains(":")) {
+                    String[] ArrayofString = str.split("[:]", 2);
+                    String whatWeWant = ArrayofString[1];
+                    String[] removeQuotes = whatWeWant.split("[\"]",3);
+                    String info = removeQuotes[1];
+                    //items.setName(ArrayofString[0]);
+                    //items.setSerial(ArrayofString[1]);
+                    //items.setPrice(ArrayofString[2]);
+                    //list.add(items);
+                   // System.out.println(ArrayofString[0]);
+                    System.out.println(ArrayofString[1]);
+                    System.out.println(info);
+                    listOfString.add(info);
+                }
             }
             nameErrorLabel.setText("");
+                for (int i = 0; i < listOfString.size(); i++){
+                    String name = listOfString.get(i);
+                    String serial = listOfString.get(i+1);
+                    String price = listOfString.get(i+2);
+                    Item items = new Item(name, serial,price);
+                    list.add(items);
+                    i = i+2;
+                }
+                //System.out.println(list.get(i).getName());
+                //System.out.println(list.get(i).getSerial());
+                //System.out.println(list.get(i).getPrice());
 
-        }
-            for (int i = 0; i < list.size(); i++){
-                System.out.println(list.get(i).getName());
-                System.out.println(list.get(i).getSerial());
-                System.out.println(list.get(i).getPrice());
-            }
+            //}
     }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
-            nameErrorLabel.setText("Either the file was corrupted or not in inveX format.");
-        }*/
+            nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
+        }
     }
     public boolean uniqueSerial(String serial){
         boolean istrue  = true;

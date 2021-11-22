@@ -7,7 +7,13 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Locale;
 
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 2 Solution
+ *  Copyright 2021 Alexys Veloz
+ */
+
 import static org.junit.jupiter.api.Assertions.*;
+
     public class InveXTest extends ManagerController {
         ObservableList<Item> basicList = FXCollections.observableArrayList();
         ManagerController mc = new ManagerController();

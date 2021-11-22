@@ -69,18 +69,18 @@ in the left hand side you'll see two textboxes with a label on top that says Sea
 in the left hand side you'll see two textboxes with a label on top that says Search. The one on bottom searches by serial number. Write something in there and press enter, and if any item contains what you typed as a serial number, it'll bring it up to the tableview. This is not case sensitive, so if you type "ug" in the search field, it'll bring up any serial number that has "ug", "Ug", "uG", or "UG" as part of the serial number.
 
 
--clear Search to bring it back to normal View:
+- Clear Search to bring it back to normal View:
 On the left hand side you'll see a button that says 'Clear Search'. Press the button and it'll show the whole list of items again. 
 
 
--Sort By Name:
+- Sort By Name:
 Click on the "Name" column at the very top, and items will be sorted by name. Clicking it once  will sort by  alphanumerics (0-9 and A first, Z last, case insensitive). Click on it again it will sort again by reverse Alphanumerics (Z first, 0-9 and A last). Clicking on it again will not do anything, and then the clicks cycle. Essentially every (%3 = 1) clicks will sort by alphanumerics (%3 = 2) clicks will sort by reverse alphanumerics, and every (%3 = 0) clicks will do nothing.
 
 
--Sort By Serial Number:
+- Sort By Serial Number:
 Click on the "Serial Number" column at the very top, and items will be sorted by Serial Number. Clicking it once will sort by Alphabetical order (A first, Z last, case insensitive). Clicking on it again will sort it by reverse Alphabetical order (Z first, A last, case insensitive). Clicking on it again will do nothing, and then the clicks cycle. Essentially every (%3 = 1) clicks will sort by alphabetical order, every (%3 = 2) clicks will sort by reverse alphabetical order, and every (%3 = 0) clicks will do nothing.
 
--Sort By Price:
+- Sort By Price:
 Click on the "Price (U.S Dollars)" column at the very top, and items will be sorted by Price. Clicking it once will sort by ascending order (smallest value first, biggest value last). Clicking on it again will sort it by descending order (biggest value first, smallest value last). Clicking on it again will do nothing, and then the clicks cycle. Essentially every (%3 = 1) clicks will sort by ascending order, every (%3 = 2) clicks will sort by descending order, and every (%3 = 0) clicks will do nothing.
 
 
