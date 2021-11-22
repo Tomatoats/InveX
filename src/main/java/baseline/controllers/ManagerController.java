@@ -206,10 +206,13 @@ public class ManagerController extends InventoryManagementApplication implements
         Window stage = nameErrorLabel.getScene().getWindow();
         //open up filechooser and set up for a txt file to be saved
         fileChooser.setTitle("Save Dialog");
-        fileChooser.setInitialFileName("Lister");
+        fileChooser.setInitialFileName("InveX");
         if (fileType.equals("*.txt")){
             try {
-                fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save / load a txt", "*.txt"));
+                FileChooser.ExtensionFilter tsv = new FileChooser.ExtensionFilter("Save as a TSV text file (.txt)", "*.txt");
+                fileChooser.getExtensionFilters().add(tsv);
+                fileChooser.setSelectedExtensionFilter(tsv);
+                //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save / load a txt", "*.txt"));
                 File file = fileChooser.showSaveDialog(stage);
                 fileChooser.setInitialDirectory(file.getParentFile());
                 saveAsTSV(file);
@@ -218,7 +221,10 @@ public class ManagerController extends InventoryManagementApplication implements
         }
         else if (fileType.equals("*.JSON")){
             try {
-                fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(" Save / load a json file", "*.JSON"));
+                FileChooser.ExtensionFilter json = new FileChooser.ExtensionFilter("Save as a .JSON file", "*.JSON");
+                fileChooser.getExtensionFilters().add(json);
+                fileChooser.setSelectedExtensionFilter(json);
+                //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(" Save / load a json file", "*.JSON"));
                 File file = fileChooser.showSaveDialog(stage);
                 fileChooser.setInitialDirectory(file.getParentFile());
                 saveAsJSON(file);
@@ -227,7 +233,10 @@ public class ManagerController extends InventoryManagementApplication implements
         }
         else{
             try {
-                fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save / load a html file", "*.html"));
+                FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("Save as a html file", "*.html");
+                fileChooser.getExtensionFilters().add(html);
+                fileChooser.setSelectedExtensionFilter(html);
+                //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Save as a html file", "*.html"));
                 File file = fileChooser.showSaveDialog(stage);
                 fileChooser.setInitialDirectory(file.getParentFile());
                 saveAsHTML(file);
@@ -433,11 +442,14 @@ public class ManagerController extends InventoryManagementApplication implements
         Window stage = nameErrorLabel.getScene().getWindow();
         // load up the filechooser and look for only text files
         fileChooser.setTitle("Load Dialog");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a text file (TSV)", "*.txt"));
+        FileChooser.ExtensionFilter tsv = new FileChooser.ExtensionFilter("choose a text file (TSV)", "*.txt");
+        fileChooser.getExtensionFilters().add(tsv);
+        fileChooser.setSelectedExtensionFilter(tsv);
+        //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a text file (TSV)", "*.txt"));
         File file = fileChooser.showOpenDialog(stage);
-        fileChooser.setInitialDirectory(file.getParentFile());
         try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("\n"))
         {
+            fileChooser.setInitialDirectory(file.getParentFile());
             clearAllItems();
             //make sure the list is empty then scan in all the strings, parsing them correctly
             //also use a while to make sure it continues after the delimiter
@@ -453,19 +465,21 @@ public class ManagerController extends InventoryManagementApplication implements
             nameErrorLabel.setText("");
         }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
-            nameErrorLabel.setText("Either the file was corrupted or not in inveX format.");
+            nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
         }
-
 
     }
     public void loadAsHTML(){
         Window stage = nameErrorLabel.getScene().getWindow();
         // load up the filechooser and look for only text files
         fileChooser.setTitle("Load Dialog");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a  html", "*.html"));
+        FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("choose a html file", "*.html");
+        fileChooser.getExtensionFilters().add(html);
+        fileChooser.setSelectedExtensionFilter(html);
+        //fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("choose a  html", "*.html"));
         File file = fileChooser.showOpenDialog(stage);
-        fileChooser.setInitialDirectory(file.getParentFile());
         try (Scanner input = new Scanner(Paths.get(String.valueOf(file))).useDelimiter("</html>")) {
+            fileChooser.setInitialDirectory(file.getParentFile());
             clearAllItems();
             //make sure the list is empty then scan in all the strings, parsing them correctly
             //also use a while to make sure it continues after the delimiter
@@ -493,7 +507,7 @@ public class ManagerController extends InventoryManagementApplication implements
             nameErrorLabel.setText("");
         }
         catch (ArrayIndexOutOfBoundsException | IOException arrayIndexOutOfBoundsException) {
-            nameErrorLabel.setText("Either the file was corrupted or not in inveX format.");
+            nameErrorLabel.setText("Either file was corrupted, not in inveX format, or you didn't choose a file.");
         }
 
 
@@ -538,13 +552,11 @@ public class ManagerController extends InventoryManagementApplication implements
     }
     public boolean uniqueSerial(String serial){
         boolean istrue  = true;
-        for (Item item : list) {
-            System.out.println(serial);
-            System.out.println(item.getSerial());
-            if (item.getSerial().equals(serial)){
-                //System.out.println("YOOOOOOOOOOO");
+        for (Item items : list) {
+
+            if (items.getSerial().equals(serial)) {
                 istrue = false;
-                //return false;
+                break;
             }
         }
         return istrue;
