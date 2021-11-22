@@ -1,5 +1,5 @@
-import baseline.controllers.ManagerController;
-import baseline.functions.Item;
+import baseline.ManagerController;
+import baseline.Item;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 
 /*
