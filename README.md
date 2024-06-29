@@ -7,7 +7,7 @@ I first want to say thank you for Professor Hollander. This was by far my favori
 This class was amazing and I'd take it again in a heartbeat. 
 Thank you for anyone in the  UCF CS, ECE, & IT discord who helped
 ## Authors
-Alexys Veloz
+Alexys Octavio Veloz
 ## Features
 
 - Can Add items
