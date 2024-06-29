@@ -89,3 +89,7 @@ To Save the list, go to the menu bar and hover over 'File'. Underneath, you'll s
 
 - How to load an existing / previously saved list:
 | Warning: Before loading, if you have a list with items in it at the moment I highly recommend saving, as it will delete the items to account for the loaded in list. | To load in a list, go to the menu bar and hover over 'File'. Underneath, you'll see buttons to load a TSV (.txt) file, .html, or .JSON file. Click which ever file format you'd like to load, and a file explorer for whichever Opertating System you are on should appear. Choose through your directory the file you'd like to load! Once loaded, all the items from said list will show up in your tableview, ready for you!
+
+## You may use this application if you wish, on two conditiions:
+1) It must __NEVER__ be a commercial product or in a product people have to pay for.
+2) You give credit to me, Alexys Octavio Veloz.
